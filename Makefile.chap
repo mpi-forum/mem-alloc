@@ -1,0 +1,45 @@
+#
+# 
+LATEX = pdflatex
+# ECHO should be an echo command that does NOT try to turn \b into backspace
+ECHO = /bin/echo
+TEXINPUTS := $(shell kpsepath tex):..
+$(CHAP).pdf: $(CHAP).tex ../Makefile.chap # ../chap-changes/changes.tex
+	@rm -f temp.tex
+	@$(ECHO) '\setcounter{chapter}'"{$(CHAPNUM)}" | \
+	cat ../chapter-head.tex - $(CHAP).tex > temp.tex
+	@if [ x$(CHAP) != xchanges -a "x$(INCLUDE_CHANGES)" = "xyes" ] ; then  \
+	    $(ECHO) '\appendix' >> temp.tex ; \
+	    $(ECHO) '\setcounter{chapter}{1}' >> temp.tex ; \
+	    cat ../chap-changes/changes.tex >> temp.tex ; \
+	fi
+	@if grep \\cite $(CHAP).tex 1>/dev/null 2>&1 ; then \
+	    $(ECHO) '\bibliographystyle{plain}' >> temp.tex ; \
+	    $(ECHO) '\bibliography{../refs}' >> temp.tex ; \
+	fi
+	@$(ECHO) '\include{temp-index}' >> temp.tex
+	@$(ECHO) '\end{document}' >> temp.tex
+	@rm -f temp.
+	export TEXINPUTS=$(TEXINPUTS) && $(LATEX) temp.tex </dev/null 
+	-bibtex temp
+	makeindex temp
+	@rm -f temp.needed temp2.refs
+	grep 'Reference.*undefined' temp.log | sed 's/.*Reference `\(.*\)'"'"'.*/\1/g' > temp.needed
+	@if [ -s temp.needed ] ; then \
+	    for item in `cat temp.needed` ; do \
+	        grep -h $$item ../chap-*/*.aux >> temp2.refs ;  \
+	    done ; \
+	    cat temp2.refs >> temp.aux ; \
+	fi
+	@mv temp.ind temp-index.tex
+	export TEXINPUTS=$(TEXINPUTS) && $(LATEX) temp.tex </dev/null >/dev/null
+	@if [ -s temp2.refs ] ; then  \
+	    cat temp2.refs >> temp.aux ; \
+	fi
+	export TEXINPUTS=$(TEXINPUTS) && $(LATEX) temp.tex
+	mv temp.pdf $(CHAP).pdf
+
+clean:
+	rm -f temp.tex temp-index.tex temp.pdf *.aux *.ind *.log *.blg
+	rm -f temp.bbl temp.brf temp.idx temp.ilg temp.out
+	rm -f temp2.refs temp.needed

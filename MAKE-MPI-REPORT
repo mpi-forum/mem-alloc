@@ -1,0 +1,96 @@
+#!/bin/csh
+#MAKE-MPI-REPORT
+
+#adopted from HPF script by Steve Otto, July 29, 1993
+#thanks to: David Loveman, Digital Equipment Corporation
+
+#set TEXroot=/usr/local/bin
+#alias latex $TEXroot/latex
+alias latex pdflatex
+#alias dvips $TEXroot/dvips
+#alias xdvi $TEXroot/xdvi
+
+set thedate = `date`
+echo "  "
+echo BEGIN JOB ON: $thedate
+
+echo "This script assumes that latex, bibtex, dvips, and xdvi"
+echo "are on your search path."
+echo "  "
+
+which latex
+
+##################################################
+#        Run LATEX the first time
+##################################################
+echo "  "
+echo "latex mpi-report the first time"
+latex mpi-report < /dev/null
+if($status != 0) then
+   echo "first LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run BIBTEX
+##################################################
+echo "  "
+echo "bibtex mpi-report"
+bibtex mpi-report < /dev/null
+if($status != 0) then
+   echo "BibTeX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run LATEX the second time
+##################################################
+echo "  "
+echo "latex mpi-report the second time"
+latex mpi-report < /dev/null
+if($status != 0) then
+   echo "second LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run LATEX the third time
+##################################################
+echo "  "
+echo "latex mpi-report the third time"
+latex mpi-report < /dev/null
+if($status != 0) then
+   echo "third LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run xdvi to view the .dvi file
+##################################################
+echo "  "
+echo "xdvi mpi-report"
+# xdvi mpi-report &
+
+##################################################
+#        Run dvips to produce a ps file
+##################################################
+echo "  "
+echo "dvips -o mpi-report.ps mpi-report"
+dvips -o mpi-report.ps mpi-report
+if($status != 0) then
+   echo "DVIPS fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Print the ps file
+##################################################
+echo "  "
+echo "now print the postscript file (this script doesn't)"
+echo "the MPI Report is meant to be two-sided"
+echo "CAUTION: do not run CLEANUP until printing has completed"
+
+echo "  "
+echo "done"
+echo "  "
+

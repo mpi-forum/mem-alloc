@@ -1,0 +1,248 @@
+
+% Version as of 25 March 1997 by Steve Huss-Lederman
+% Version as of 06 January 2008 by Rainer Keller (using pdflatex)
+% Version as of 19 February 2008 by Rolf Rabenseifner (combining 1.3+2.0) 
+
+%
+% The top-level LaTeX file for MPI-2.1 and further versions.
+% latex this file to get complete document
+% 
+% To print only one chapter, use either the MAKE-MPI-CHAPTER
+% utilities provided in this directory, or put an \includeonly{}
+% command in (see Lamport, page 76)
+%                       -- Steve Otto
+%
+%
+
+\documentclass[twoside,11pt,fleqn]{book}
+\pagestyle{plain}
+\setcounter{tocdepth}{3} 
+\marginparwidth 0pt
+\oddsidemargin=.25in
+\evensidemargin  .25in
+\marginparsep 0pt
+\topmargin=-.5in
+\textwidth=6.0in
+\textheight=9.0in
+\parindent=2em
+% Index generation, please see "man makeindex" and README
+\usepackage{makeidx}
+\usepackage{mdwlist}
+\usepackage{fancyhdr}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\usepackage[edtable]{lineno}
+
+% Use this same disclaimer line in several places
+\def\disclaim{{\em The interface described in this document is not part
+  of the official MPI specification}}
+
+% For the "plain" style
+\fancypagestyle{plain}{%
+\fancyhf{}
+%\fancyhead[C]{\disclaim}
+\fancyfoot[C]{\thepage \\
+\disclaim}
+}
+% For the "plain with line numbers" style, used for \chapter
+\fancypagestyle{plainwithlinenumbers}{%
+\fancyhf{}
+%\fancyhead[C]{\disclaim}
+\fancyfoot[C]{\thepage \\
+\disclaim}
+}
+
+\usepackage{ifpdf}
+\ifpdf
+% JMS This doesn't seem to work on Macs
+%  \usepackage{color}
+\else
+  \usepackage[dvips]{color}
+\fi
+
+\usepackage[outerbars,color]{changebar}
+\usepackage{xspace}
+
+\include{mpi-macs}
+
+%%%%% Packages Depending on whether we are using pdflatex or latex %%%%%%%%%%%%
+\ifpdf
+  \typeout{  }
+  \typeout{Loading PDF-Graphicx packages ... }
+  \typeout{-------------------------------------------------------------------}
+
+  \usepackage[pdftex]{graphicx}                   % graphics extension
+  \DeclareGraphicsExtensions{.pdf}                % In case of using pdflatex set ext.
+\ifusecolor
+  \usepackage[pdftex,                             % For PDF output
+              a4paper,
+              backref,
+              baseurl={http://www.mpi-forum.org},
+              colorlinks=true,
+              filecolor=black,
+% for normal and reviewcolors versions: 
+              linkcolor=blue,
+              citecolor=red,
+              urlcolor=blue,
+% for normal and reviewcolors versions: 
+% (colorlinks is not changed, to be absolutely sure that all spacing is the same)
+%              linkcolor=black,
+%              citecolor=black,
+%              urlcolor=black,
+              hypertexnames=true,
+              pdfauthor={MPI-Forum},
+              pdftitle={The MPIR Process Acquisition Interface},
+              pdfsubject={The MPIR Process Acquisition Interface},
+              pdfkeywords={MPI, MPIR, Process Acquisition},
+              pdfpagelabels,
+              plainpages=false,
+	      pagebackref=false
+              ]{hyperref}      % For hyperlinks
+\else
+  \usepackage[pdftex,                             % For PDF output
+              a4paper,
+              backref,
+              baseurl={http://www.mpi-forum.org},
+              colorlinks=true,
+              filecolor=black,
+% (colorlinks is not changed, to be absolutely sure that all spacing is the same)
+              linkcolor=black,
+              citecolor=black,
+              urlcolor=black,
+              hypertexnames=true,
+              pdfauthor={MPI-Forum},
+              pdftitle={The MPIR Process Acquisition Interface},
+              pdfsubject={The MPIR Process Acquisition Interface},
+              pdfkeywords={MPI, MPIR, Process Acquisition},
+              pdfpagelabels,
+              plainpages=false,
+	      pagebackref=false
+              ]{hyperref}      % For hyperlinks
+\fi
+%  \usepackage{color}
+\else
+  \typeout{  }
+  \typeout{Loading EPS-Graphicx packages ... }
+  \typeout{-------------------------------------------------------------------}
+
+  \usepackage{graphicx}                           % graphics extension
+  \DeclareGraphicsExtensions{.eps}                % In case of using pdflatex set ext.
+  \usepackage[
+              dvips,                              % For PS output
+              a4paper,
+              backref,
+              colorlinks=true,
+              filecolor=black,
+% for normal and reviewcolors versions: 
+              linkcolor=blue,
+              citecolor=red,
+              urlcolor=blue,
+% for normal and reviewcolors versions: 
+% (colorlinks is not changed, to be absolutely sure that all spacing is the same)
+%              linkcolor=black,
+%              citecolor=black,
+%              urlcolor=black,
+              hypertexnames=false]{hyperref}      % For hyperlinks
+%  \usepackage[dvips]{color}
+\fi
+
+% Watermark.  Be obnoxious with the -45 rotation so that we get an X.
+%\usepackage{type1cm}
+%\usepackage{eso-pic}
+%\makeatletter
+%\AddToShipoutPicture{%
+%            \setlength{\@tempdimb}{.5\paperwidth}%
+%            \setlength{\@tempdimc}{.5\paperheight}%
+%            \setlength{\unitlength}{1pt}%
+%            \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+%        \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}%
+%        {\fontsize{0.7cm}{0.7cm}\selectfont{\disclaim}}}}%
+%            }%
+%            \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+%        \makebox(0,0){\rotatebox{-45}{\textcolor[gray]{0.75}%
+%        {\fontsize{0.7cm}{0.7cm}\selectfont{\disclaim}}}}%
+%            }%
+%}
+%\makeatother
+
+\makeindex
+
+\begin{document}
+
+\pagenumbering{roman}
+
+\title{The Memory Allocation Kinds Side Document \\
+{\Large Version \MEMALLOCVERSION/}\\
+}
+
+\author{
+}
+
+\date{
+MPI Forum Hybrid Working Group\\
+%Accepted by the Message Passing Interface Forum\\
+(\MEMALLOCDATE/)\\[2ex]
+Acknowledgments\\[1.5ex]
+Authors\\
+%Contributing Authors\\
+Rohit Zambre, James Dinan,
+Maria Garzaran, Daniel Holmes,
+Edgar Gabriel, Michael Klemm, and Pedram Alizadeh%\\[1.2ex]
+%Editor\\
+%Martin Schulz\\[1.2ex]
+%Reviewers\\
+%Bronis de Supinski, William Gropp, Marc-Andr\'{e} Hermanns, David Lecomber, Ashley Pittman, Alexander Supalov, and Greg Watson
+\vspace{0.2in}
+}
+
+% included for use of documenttype 'book' 
+\frontmatter
+\maketitle
+
+\pagestyle{plain} 
+\setcounter{page}{2} 
+\hfuzz=5pt
+ 
+\newpage
+\pagestyle{empty}
+% Turning off \withlinenumbers here causes the contents pages to be
+% printed without the rulers
+\contentstrue
+\pagestyle{plain}
+\pdfbookmark[0]{Contents}{Contents}
+\tableofcontents
+\contentsfalse
+
+% If there have been an odd number of pages, we need to eject another
+% page before we change the page counter
+\ifodd\value{page}\else\hbox{}\thispagestyle{empty}\newpage\fi
+
+\mainmatter  % included for use of documenttype 'book' 
+\withlinenumbers
+\setpagewiselinenumbers
+\linenumbers
+
+\pagestyle{fancy}  
+% The interface described in this document is not part of the official
+% MPI specification
+\fancyhf{}
+%\fancyhead[C]{\disclaim}
+\fancyfoot[C]{\thepage\\
+\disclaim}
+
+\include{history}
+
+\startchap
+\include{mem_alloc}
+
+\newpage 
+\appendix
+\include{changelog}
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

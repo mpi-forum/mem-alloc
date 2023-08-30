@@ -1,0 +1,18 @@
+How to edit and build the tools chapter document
+================================================
+
+This directory is cloned from the MPI 2.2 standard with
+most chapters removed, except for the profiling chapter,
+which gets replaced with a chapter on tools interfaces
+in general.
+
+To build a PDF of this document, use the makefile in
+this directory. This will create a file called 
+mpi-report.pdf (in the format of the MPI standard).
+
+To add text for this chapter, edit one of the files
+in the subdirectory chap-prof. This directory contains
+a README file listing all files. Additional macro
+definitions or changes should be done in mpi-macs.tex
+in this directory.
+

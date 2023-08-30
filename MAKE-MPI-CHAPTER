@@ -1,0 +1,140 @@
+#!/bin/csh
+#MAKE-MPI-CHAPTER
+unalias rm
+
+# adopted from HPF script -- thanks to David Loveman
+#Version of July 29, 1993 - Steve Otto, Oregon Graduate Institute
+
+#  MAKE-MPI-CHAPTER - a script similar to MAKE-MPI-REPORT. It takes 
+#     one argument, the filename of the chapter to be produced.  It 
+#     uses the file chapter-head.tex and a set of 
+#     temporary files named temp.*
+
+#set TEXroot=/usr/local/bin
+#alias latex $TEXroot/latex
+#alias dvips $TEXroot/dvips
+#alias xdvi $TEXroot/xdvi
+
+set thedate = `date`
+echo "  "
+echo BEGIN JOB ON: $thedate
+
+echo "this script assumes that latex, dvips, and xdvi"
+echo "are on your search path"
+
+if $#argv != 1 then
+  echo -n "type the chapter's filename:"
+  set f = "$<"
+else
+  set f = $1
+endif
+
+if ( ! (-e $f) ) then
+  echo "file $f does not exist"
+  exit 1
+else if ( ! (-r $f) ) then
+  echo "file $f is not readable"
+  exit 1
+else
+  echo "file $f exists and is readable"
+endif
+
+rm -f temp.tex >& /dev/null
+cat chapter-head.tex $f > temp.tex
+cp temp.tex temp1.tex	# we will cp temp1 to temp if there are no \cite's
+echo "\bibliographystyle{plain}" >> temp.tex
+echo "\bibliography{refs}" >> temp.tex
+echo "\end{document}" >> temp.tex
+echo "\end{document}" >> temp1.tex
+
+echo "  "
+which latex
+
+grep '\cite' temp.tex >& /dev/null
+if ($status == 1) then
+    cp temp1.tex temp.tex
+endif
+##################################################
+#        Run LATEX the first time
+##################################################
+echo "  "
+echo "latex $f the first time"
+latex temp #< /dev/null
+if($status != 0) then
+   echo "first LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run BIBTEX
+##################################################
+echo "  "
+echo "bibtex $f"
+bibtex temp < /dev/null
+if($status != 0) then
+   echo "BibTeX run fails, quit"
+   exit(1)
+endif
+
+grep "\item" temp.bbl	# check to see if any items have appeared in bbl file
+if($status == 1) then	# if not, overwrite temp with temp1
+    rm -f temp.tex >& /dev/null
+    mv temp1.tex temp.tex
+endif
+
+##################################################
+#        Run LATEX the second time
+##################################################
+echo "  "
+echo "latex $f the second time"
+latex temp < /dev/null
+if($status != 0) then
+   echo "second LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run LATEX the third time
+##################################################
+echo "  "
+echo "latex $f the third time"
+latex temp < /dev/null
+if($status != 0) then
+   echo "third LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run dvips to produce a ps file
+##################################################
+echo "  "
+echo "dvips -o temp.ps $f"
+dvips -o temp.ps temp
+if($status != 0) then
+   echo "DVIPS fails, quit"
+   exit(1)
+endif
+
+set fbase = `basename $f '.tex'`
+rm -f $fbase.ps $fbase.dvi >& /dev/null
+mv temp.ps $fbase.ps
+mv temp.dvi $fbase.dvi
+echo "  "
+echo "files $fbase.ps and $fbase.dvi have been created"
+
+##################################################
+#        Run xdvi to view the .dvi file
+##################################################
+#echo "  "
+#echo "xdvi $fbase"
+#xdvi $fbase &
+
+##################################################
+#        Print the ps file
+##################################################
+echo "  "
+echo "now print the postscript file (this script doesn't)"
+
+rm -f temp.* >& /dev/null
+echo "done"
+echo "  "

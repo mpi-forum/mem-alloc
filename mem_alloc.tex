@@ -1,0 +1,135 @@
+%\chapter{The MPIR Process Acquisition Interface}
+
+\renewcommand{\Color}[1]{}
+
+\newenvironment{etabular}
+  {\edtable{tabular}}
+  {\endedtable}
+
+\newcommand{\semanticstwo}[2]
+{
+\Color{green}
+\begin{etabular}{l|l}
+\hspace*{0.1cm} & #1 \\
+& #2\\
+\end{etabular}
+\vspace*{0.2cm}
+\Color{black}
+}
+
+\newcommand{\semanticsthree}[3]
+{
+\Color{green}
+\begin{etabular}{l|l}
+\hspace*{0.1cm} & #1 \\
+& #2\\
+& #3\\
+\end{etabular}
+\vspace*{0.2cm}
+\Color{black}
+}
+
+\newcommand{\semanticsfour}[4]
+{
+\Color{green}
+\begin{etabular}{l|l}
+\hspace*{0.1cm} & #1 \\
+& #2\\
+& #3\\
+& #4\\
+\end{etabular}
+\vspace*{0.2cm}
+\Color{black}
+}
+
+\chapter{Overview}
+
+Modern computing systems contain a variety of memory types, each
+closely associated with a distinct type of computing hardware. For
+example, compute accelerators such as GPUs typically feature their
+own memory that is distinct from the memory attached to the host
+processor. Additionally, GPUs from different vendors also differ
+in their memory types. The differences in memory types influence
+feature availability and performance behavior of an application
+running on such modern systems. Hence, MPI libraries need to be
+aware of and support additional memory types. For a given type of
+memory, MPI libraries need to know the associated memory allocator and
+the limitations on memory access. The different memory kinds capture
+the differentiating information needed by MPI libraries for different
+memory types.
+
+This MPI side document defines the memory allocation kinds and their
+associated restrictors that users can use to query the support for
+different memory kinds provided by the MPI library.
+
+\chapter{Definitions}
+%\chapter{MPIR Process Acquisition Interface Definitions}
+
+This section contains definitions of memory allocation kinds and
+their reistrictors.
+
+\section{Kind: cuda}
+
+The \infokey{cuda} memory kind refers to the memory allocated by the
+CUDA runtime system~\cite{cudaref}.
+
+\subsubsection{Restrictors}
+
+\begin{itemize}
+
+\item \infokey{host}: Support for memory allocations on the host system
+    that are page-locked for direct access from the CUDA device (e.g.,
+        memory allocations from the cudaHostAlloc() function).
+
+\item \infokey{device}: Support for memory allocated on a CUDA device
+    (e.g., memory allocations from the cudaMalloc() function).
+
+\item \infokey{managed}: Support for memory that is managed by CUDA’s
+    Unified Memory system (e.g., memory allocations from the
+        cudaMallocManaged() function).
+
+\end{itemize}
+
+\section{Kind: rocm}
+
+The \infokey{rocm} memory kind refers to the memory allocated by the ROCm
+runtime system~\cite{rocmref}.
+
+\subsubsection{Restrictors}
+
+\begin{itemize}
+
+\item \infokey{host}: Support for memory allocated on the host system that
+    is page-locked for direct access from the ROCm device (e.g., memory
+        allocations from the hipHostMalloc() function).
+
+\item \infokey{device}: Support for memory allocated on the ROCm device
+    (e.g., memory allocations from the hipMalloc() function).
+
+\item \infokey{managed}: Support for memory that is managed automatically
+    by the ROCm runtime (e.g. memory allocations from the
+        hipMallocManaged() function).
+
+\end{itemize}
+
+\section{Kind: levelzero}
+
+The \infokey{levelzero} memory kind refers to the memory allocated by the
+Level Zero runtime system~\cite{zeref}.
+
+\subsubsection{Restrictors}
+
+\begin{itemize}
+
+\item \infokey{host}: Support for memory allocated on the host that is
+    accessible by Level Zero devices (e.g., memory allocations from the
+        zeMemAllocHost() function).
+
+\item \infokey{device}: Support for memory allocated on a Level Zero device
+    (e.g., memory allocations from the zeMemAllocDevice() function). 
+
+\item \infokey{shared}: Support for memory allocated that will be shared
+    between the host and one or more devices Level Zero devices (e.g.,
+        memory allocations from the zeMemAllocShared() function).
+
+\end{itemize}

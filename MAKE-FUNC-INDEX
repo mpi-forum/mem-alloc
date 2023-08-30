@@ -1,0 +1,66 @@
+#!/bin/bash
+set -x
+#
+# Create all of the index files for the MPI Standard document.
+ 
+create_index()
+{
+  local title=$1 
+  local egrepoption=$2 
+  local egrepscheme=$3 
+  local substscheme=$4 
+  local introtext=$5 
+ 
+  echo "making the $1..." 
+  egrep "$egrepoption" "$egrepscheme" mpi-report.idx.all | sed -e "$substscheme" > mpi-report.idx 
+  echo "now running makeindex..."
+  makeindex -c mpi-report.idx
+  cat <<EOF >>temp
+ 
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{$1}
+\makeatletter
+\renewcommand{\@index}{$1}
+\renewcommand{\@introtext}{$5}
+\makeatother
+EOF
+  cat mpi-report.ind >> temp
+   
+} 
+ 
+/bin/rm -f temp temp.idx mpi-report.idx.save
+mv mpi-report.idx mpi-report.idx.save
+echo "stripping raw .idx file..."
+sed -e 's%(.*)%%g' -e 's/indexentry{ */indexentry{/g' \
+       mpi-report.idx.save > mpi-report.idx.all
+/bin/rm -f func-index.tex
+/bin/rm -f temp
+touch temp 
+chmod +w temp
+
+create_index 'Examples Index'      '-e'  '{EXAMPLES:'                   's/EXAMPLES://' \
+                                   'This index lists code examples throughout the text.  Some examples are referred to by content; others are listed by the major \MPI/ function that they are demonstrating.  \MPI/ functions listed in all capital letter are Fortran examples; \MPI/ functions listed in mixed case are C/C++ examples.' 
+create_index 'MPI Constant and Predefined Handle Index'  '-e'  '{CONST:MPI[^|}]*[ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789][|}]'  's/CONST://'    \
+                                   'This index lists predefined \MPI/ constants and handles.' 
+create_index 'MPI Declarations Index'  '-e'  '{CONST:MPI[^|}]*[abcdefghijklmnopqrstuvwxyz]'  's/CONST://'    \
+                                   "This index refers to declarations needed in C/C++, such as address kind integers, handles, etc. The underlined page numbers is the \`\`main'' reference (sometimes there are more than one when key concepts are discussed in multiple areas)."
+create_index 'MPI Callback Function Prototype Index' '-e'  '{TYPEDEF:'  's/TYPEDEF://'  \
+                                   'This index lists the C typedef names for callback routines, such as those used with attribute caching or user-defined reduction operations.  C++ names for these typedefs and Fortran example prototypes are given near the text of the C name.'
+# create_index 'MPI C++ Index'       '-e'  '{MPI::'                       's/ / /'        \
+#                                    'Most \MPI/ C++ constants have a direct equivalent in C. There are some exceptions referenced in this index.'
+create_index 'MPI Function Index'  '-e'  '{MPI\\_|{PMPI\\_|{mpiexec|{mpirun'    's/ / /'        \
+                                   'The underlined page numbers refer to the function definitions.'
+# create_index 'MPI Index'           '-v'  '{MPI\\_|{PMPI\\_|{mpiexec|{EXAMPLES:|{CONST:MPI|{TYPEDEF:|{MPI::'  's/CONST://' \
+#                                    'All other stuff.' 
+ 
+echo "making final func-index.tex..." 
+sed -e 's%_%\_%g' -e 's/theindex/myindex/g' temp > func-index.tex
+rm mpi-report.idx mpi-report.ind
+ 
+# /bin/rm -f temp
+# sed -e 's%_%\_%g' mpi-report.idx > mpi-report.t
+# /bin/rm -f mpi-report.idx
+# mv mpi-report.t mpi-report.idx
+echo "done"
+
