@@ -1,10 +1,8 @@
-How to edit and build the tools chapter document
-================================================
+How to edit and build the Memory Allocation Kinds side document
+===============================================================
 
-This directory is cloned from the MPI 2.2 standard with
-most chapters removed, except for the profiling chapter,
-which gets replaced with a chapter on tools interfaces
-in general.
+This directory is cloned from the MPIR Process Acquisition
+Interface side document.
 
 To build a PDF of this document, use the makefile in
 this directory. This will create a file called 
@@ -15,4 +13,3 @@ in the subdirectory chap-prof. This directory contains
 a README file listing all files. Additional macro
 definitions or changes should be done in mpi-macs.tex
 in this directory.
-
