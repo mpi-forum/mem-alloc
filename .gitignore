@@ -158,8 +158,12 @@ acs-*.bib
 
 # makeidx
 *.idx
+*.idx\.*
 *.ilg
 *.ind
+
+# chappage
+chappage.txt
 
 # minitoc
 *.maf
