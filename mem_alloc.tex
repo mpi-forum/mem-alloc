@@ -77,14 +77,14 @@ CUDA runtime system~\cite{cudaref}.
 \begin{itemize}
 
 \item \infokey{host}: Support for memory allocations on the host system
-    that are page-locked for direct access from the CUDA device (e.g.,
+    that are page-locked for direct access from the CUDA device (\eg,
         memory allocations from the \function{cudaHostAlloc()} function).
 
 \item \infokey{device}: Support for memory allocated on a CUDA device
-    (e.g., memory allocations from the \function{cudaMalloc()} function).
+    (\eg, memory allocations from the \function{cudaMalloc()} function).
 
 \item \infokey{managed}: Support for memory that is managed by CUDA’s
-    Unified Memory system (e.g., memory allocations from the
+    Unified Memory system (\eg, memory allocations from the
         \function{cudaMallocManaged()} function).
 
 \end{itemize}
@@ -99,14 +99,14 @@ runtime system~\cite{rocmref}.
 \begin{itemize}
 
 \item \infokey{host}: Support for memory allocated on the host system that
-    is page-locked for direct access from the ROCm device (e.g., memory
+    is page-locked for direct access from the ROCm device (\eg, memory
         allocations from the \function{hipHostMalloc()} function).
 
 \item \infokey{device}: Support for memory allocated on the ROCm device
-    (e.g., memory allocations from the \function{hipMalloc()} function).
+    (\eg, memory allocations from the \function{hipMalloc()} function).
 
 \item \infokey{managed}: Support for memory that is managed automatically
-    by the ROCm runtime (e.g. memory allocations from the
+    by the ROCm runtime (\eg, memory allocations from the
         \function{hipMallocManaged()} function).
 
 \end{itemize}
@@ -121,14 +121,14 @@ Level Zero runtime system~\cite{zeref}.
 \begin{itemize}
 
 \item \infokey{host}: Support for memory allocated on the host that is
-    accessible by Level Zero devices (e.g., memory allocations from the
+    accessible by Level Zero devices (\eg, memory allocations from the
         \function{zeMemAllocHost()} function).
 
 \item \infokey{device}: Support for memory allocated on a Level Zero device
-    (e.g., memory allocations from the \function{zeMemAllocDevice()} function). 
+    (\eg, memory allocations from the \function{zeMemAllocDevice()} function). 
 
 \item \infokey{shared}: Support for memory allocated that will be shared
-    between the host and one or more devices Level Zero devices (e.g.,
+    between the host and one or more devices Level Zero devices (\eg,
         memory allocations from the \function{zeMemAllocShared()} function).
 
 \end{itemize}
