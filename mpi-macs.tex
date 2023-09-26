@@ -972,4 +972,52 @@ typedef int #1; \par \vspace{0.1in}}}
 \setcounter{totalnumber}{20} 
    
 \def\eg{e.g.}
+
+\usepackage{listings}
+
+\definecolor{MPIlightgrey}{RGB}{240,240,240}
+
+% Adjust the default style
+\lstset{language=C,
+        keepspaces=true,
+        showstringspaces=false,
+        basicstyle=\small\ttfamily,
+        columns=fixed,
+%        columns=fixed,basewidth=0.5em,
+%        columns=fixed,basewidth=0.6em,
+        backgroundcolor=\color{MPIlightgrey},
+}
+
+% Define an "MPI" dialect of default C.  This is required to get
+% the morekeywords option to work, and is more in keeping with the design
+% of the listing package.
+\lstdefinelanguage[MPI]{C}[]{C}%
+{%
+        keywordsprefix={MPI_},%
+% We must list any PMPI names
+        morekeywords={PMPI_Init,PMPI_T_init_thread,PMPI_T_pvar_get_num,%
+PMPI_T_pvar_get_info,PMPI_T_pvar_session_create,PMPI_T_pvar_handle_alloc,%
+PMPI_T_pvar_start,PMPI_T_pvar_read,PMPI_T_pvar_handle_free,%
+PMPI_T_pvar_session_free,PMPI_T_finalize,PMPI_Example,%
+PMPI_Finalize,PMPI_Recv,PMPI_Send,%
+% mpi info keys used in examples
+mpi_hw_resource_type,
+},%
+% make #pragma a "keyword" so that it doesn't need to start in column 1,
+% which is a requirement in the lstlisting package for directives
+        otherkeywords={\#pragma},
+}
+
+% New indexing for indices
+% Use \Exindex{language}{shorttitle}{namelist}
+% as in
+% \Exindex{C}{Use of send and receive}{MPI\_Send,MPI\_Recv}
+% The name list may contain any mixture of:
+%   MPI Function names
+%   MPI Declarations (e.g., MPI_Aint), expressed as d:name, e.g., d:MPI_Aint
+%   MPI Constants (e.g., MPI_COMM_WORLD), expressed as c:name
+%   MPI Callback Typedefs (e.g., MPI_Handler_function), expressed as t:name
+%\newif\ifexindexerror
+%\exindexerrorfalse
+%\newcommand{\Exindex}[3]{\ifInExample\IImpiindex{NEWEXAMPLES:\arabic{chapter}.\arabic{example}::#1::#2::#3}\else\ifexindexerror\errmessage{Exindex used outside of an example}\else\IImpiindex{NEWEXAMPLES:NA::#1::#2::#3}\typeout{Warning: Exindex used outside of an example}\fi\fi}
 %----------------------------------------------------------------------
