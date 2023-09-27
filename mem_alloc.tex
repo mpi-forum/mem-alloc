@@ -56,13 +56,13 @@ aware of and support additional memory types. For a given type of
 memory, MPI libraries need to know the associated memory allocator and
 the limitations on memory access. The different memory kinds capture
 the differentiating information needed by MPI libraries for different
-memory types. 
+memory types.
 
 This MPI side document defines the memory allocation kinds and their
 associated restrictors that users can use to query the support for
 different memory kinds provided by the MPI library. These definitions
 supplement those found in section 11.4.3 of the MPI standard, which
-also explains their usage model. 
+also explains their usage model.
 
 \chapter{Definitions}
 
@@ -107,6 +107,7 @@ underlying MPI library.
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
+#include <cuda_runtime.h>
 
 int main(int argc, char *argv[])
 {
@@ -145,10 +146,9 @@ int main(int argc, char *argv[])
             if (strcasecmp(kind, "cuda:managed") == 0) {
                 cuda_managed_aware = 1;
             }
-            else {
-                if (strcasecmp(kind, "cuda:device") == 0) {
-                    cuda_device_aware = 1;
-                }
+            else if (strcasecmp(kind, "cuda:device") == 0) {
+                cuda_device_aware = 1;
+            }
         }
         free(valptr);
     }
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
         // Allocate managed buffer and initialize it
         cudaMallocManaged(&managed_buf, sizeof(int));
         *managed_buf = 1;
-        
+
         // Perform communication using cuda_managed_comm
         // if it's available.
         MPI_Allreduce(MPI_IN_PLACE, managed_buf, 1, MPI_INT,
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
         // Allocate system buffer and initialize it
         system_buf = malloc(sizeof(int));
         *system_buf = 1;
-    
+
         // Allocate CUDA device buffer and initialize it
         cudaMalloc(&device_buf, sizeof(int));
         cudaMemcpy(device_buf, system_buf, sizeof(int),
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
                           MPI_SUM, system_comm);
             cudaMemcpy(device_buf, system_buf, sizeof(int),
                    cudaMemcpyHostToDevice);
-        
+
             cudaFree(device_buf);
             free(system_buf);
         }
@@ -299,7 +299,7 @@ Level Zero runtime system~\cite{zeref}.
         These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_HOST}.
 
 \item \infokey{device}: Support for memory allocated on a Level Zero device
-    (\eg, memory allocations from the \function{zeMemAllocDevice()} function). 
+    (\eg, memory allocations from the \function{zeMemAllocDevice()} function).
         These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_DEVICE}.
 
 \item \infokey{shared}: Support for memory allocated that will be shared
