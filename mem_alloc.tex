@@ -106,6 +106,7 @@ underlying MPI library.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <mpi.h>
 #include <cuda_runtime.h>
 
@@ -116,6 +117,7 @@ int main(int argc, char *argv[])
     int len = 0, flag = 0;
     int *managed_buf = NULL;
     int *device_buf = NULL, *system_buf = NULL;
+    int nranks = 0;
     MPI_Info info;
     MPI_Session session;
     MPI_Group wgroup;
@@ -163,9 +165,11 @@ int main(int argc, char *argv[])
     MPI_Comm_create_from_group(wgroup,
             "org.mpi-side-doc.mem-kind.example.system",
             info, MPI_ERRORS_ABORT, &system_comm);
-
     MPI_Info_free(&info);
 
+    MPI_Comm_size(system_comm, &nranks);
+
+    /** Check for CUDA awareness **/
     // Check if all processes have CUDA managed support
     MPI_Allreduce(MPI_IN_PLACE, &cuda_managed_aware, 1, MPI_INT,
                   MPI_LAND, system_comm);
@@ -203,6 +207,7 @@ int main(int argc, char *argv[])
 
     MPI_Group_free(&wgroup);
 
+    /** Execute according to level of CUDA awareness **/
     if (cuda_managed_aware) {
         // Allocate managed buffer and initialize it
         cudaMallocManaged(&managed_buf, sizeof(int));
@@ -213,6 +218,8 @@ int main(int argc, char *argv[])
         MPI_Allreduce(MPI_IN_PLACE, managed_buf, 1, MPI_INT,
                       MPI_SUM, cuda_managed_comm);
 
+        assert((*managed_buf) == nranks);
+
         cudaFree(managed_buf);
     }
     else {
@@ -222,28 +229,36 @@ int main(int argc, char *argv[])
 
         // Allocate CUDA device buffer and initialize it
         cudaMalloc(&device_buf, sizeof(int));
-        cudaMemcpy(device_buf, system_buf, sizeof(int),
-                   cudaMemcpyHostToDevice);
+        cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
+                        cudaMemcpyHostToDevice);
 
+        cudaStreamSynchronize(0);
         if (cuda_device_aware) {
             // Perform communication using cuda_comm
             // if it's available.
             MPI_Allreduce(MPI_IN_PLACE, device_buf, 1, MPI_INT,
                           MPI_SUM, cuda_comm);
+
+            assert((*device_buf) == nranks);
         }
         else {
             // Otherwise, copy data to a system buffer,
             // use system_comm, and copy data back to device buffer
-            cudaMemcpy(system_buf, device_buf, sizeof(int),
-                   cudaMemcpyDeviceToHost);
+            cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
+                            cudaMemcpyDeviceToHost);
+
+            cudaStreamSynchronize(0);
             MPI_Allreduce(MPI_IN_PLACE, system_buf, 1, MPI_INT,
                           MPI_SUM, system_comm);
-            cudaMemcpy(device_buf, system_buf, sizeof(int),
-                   cudaMemcpyHostToDevice);
+            cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
+                            cudaMemcpyHostToDevice);
 
-            cudaFree(device_buf);
-            free(system_buf);
+            cudaStreamSynchronize(0);
+            assert((*system_buf) == nranks);
         }
+
+        cudaFree(device_buf);
+        free(system_buf);
     }
 
     if (cuda_managed_comm != MPI_COMM_NULL)
