@@ -43,6 +43,7 @@
 }
 
 \chapter{Overview}
+\label{chap:overview}
 
 Modern computing systems contain a variety of memory types, each
 closely associated with a distinct type of computing hardware. For
@@ -65,6 +66,7 @@ supplement those found in section 11.4.3 of the MPI standard, which
 also explains their usage model.
 
 \chapter{Definitions}
+\label{chap:definitions}
 
 This section contains definitions of memory allocation kinds and
 their restrictors.
@@ -72,7 +74,8 @@ their restrictors.
 \section{Kind: cuda}
 
 The \infokey{cuda} memory kind refers to the memory allocated by the
-CUDA runtime system~\cite{cudaref}.
+CUDA runtime system~\cite{cudaref}. \exref{example:alloc-kind-spm-cuda}
+showcases usage of some of the memory kinds defined in this section. 
 
 \subsubsection{Restrictors}
 
@@ -94,11 +97,67 @@ CUDA runtime system~\cite{cudaref}.
 
 \end{itemize}
 
+\section{Kind: rocm}
+
+The \infokey{rocm} memory kind refers to the memory allocated by the ROCm
+runtime system~\cite{rocmref}.
+
+\subsubsection{Restrictors}
+
+\begin{itemize}
+
+\item \infokey{host}: Support for memory allocated on the host system that
+    is page-locked for direct access from the ROCm device (\eg, memory
+        allocations from the \function{hipHostMalloc()} function).
+        These memory allocations are attributed with \function{hipMemoryTypeHost}.
+
+\item \infokey{device}: Support for memory allocated on the ROCm device
+    (\eg, memory allocations from the \function{hipMalloc()} function).
+        These memory allocations are attributed with \function{hipMemoryTypeDevice}.
+
+\item \infokey{managed}: Support for memory that is managed automatically
+    by the ROCm runtime (\eg, memory allocations from the
+        \function{hipMallocManaged()} function).
+        These memory allocations are attributed with \function{hipMemoryTypeManaged}.
+
+\end{itemize}
+
+\section{Kind: levelzero}
+
+The \infokey{levelzero} memory kind refers to the memory allocated by the
+Level Zero runtime system~\cite{zeref}.
+
+\subsubsection{Restrictors}
+
+\begin{itemize}
+
+\item \infokey{host}: Support for memory allocated on the host that is
+    accessible by Level Zero devices (\eg, memory allocations from the
+        \function{zeMemAllocHost()} function).
+        These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_HOST}.
+
+\item \infokey{device}: Support for memory allocated on a Level Zero device
+    (\eg, memory allocations from the \function{zeMemAllocDevice()} function).
+        These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_DEVICE}.
+
+\item \infokey{shared}: Support for memory allocated that will be shared
+    between the host and one or more Level Zero devices (\eg,
+        memory allocations from the \function{zeMemAllocShared()} function).
+        These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_SHARED}.
+
+\end{itemize}
+
+\chapter{Examples}
+\label{chap:examples}
+
+This section includes examples demonstrating the usage of
+memory kinds defined in \chapref{chap:definitions}.
+
 \begin{example}
 \label{example:alloc-kind-spm-cuda}
-This example demonstrates the usage of the different kinds to
-perform communication in a manner that is supported by the
-underlying MPI library.
+This CUDA example demonstrates the usage of the different
+kinds to perform communication in a manner that is supported
+by the underlying MPI library.
 %%HEADER
 %%LANG: C
 %%ENDHEADER
@@ -273,53 +332,3 @@ int main(int argc, char *argv[])
 }
 \end{lstlisting}
 \end{example}
-
-\section{Kind: rocm}
-
-The \infokey{rocm} memory kind refers to the memory allocated by the ROCm
-runtime system~\cite{rocmref}.
-
-\subsubsection{Restrictors}
-
-\begin{itemize}
-
-\item \infokey{host}: Support for memory allocated on the host system that
-    is page-locked for direct access from the ROCm device (\eg, memory
-        allocations from the \function{hipHostMalloc()} function).
-        These memory allocations are attributed with \function{hipMemoryTypeHost}.
-
-\item \infokey{device}: Support for memory allocated on the ROCm device
-    (\eg, memory allocations from the \function{hipMalloc()} function).
-        These memory allocations are attributed with \function{hipMemoryTypeDevice}.
-
-\item \infokey{managed}: Support for memory that is managed automatically
-    by the ROCm runtime (\eg, memory allocations from the
-        \function{hipMallocManaged()} function).
-        These memory allocations are attributed with \function{hipMemoryTypeManaged}.
-
-\end{itemize}
-
-\section{Kind: levelzero}
-
-The \infokey{levelzero} memory kind refers to the memory allocated by the
-Level Zero runtime system~\cite{zeref}.
-
-\subsubsection{Restrictors}
-
-\begin{itemize}
-
-\item \infokey{host}: Support for memory allocated on the host that is
-    accessible by Level Zero devices (\eg, memory allocations from the
-        \function{zeMemAllocHost()} function).
-        These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_HOST}.
-
-\item \infokey{device}: Support for memory allocated on a Level Zero device
-    (\eg, memory allocations from the \function{zeMemAllocDevice()} function).
-        These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_DEVICE}.
-
-\item \infokey{shared}: Support for memory allocated that will be shared
-    between the host and one or more Level Zero devices (\eg,
-        memory allocations from the \function{zeMemAllocShared()} function).
-        These memory allocations are attributed with \function{ZE\_MEMORY\_TYPE\_SHARED}.
-
-\end{itemize}
