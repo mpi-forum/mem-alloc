@@ -29,6 +29,7 @@
 \usepackage{makeidx}
 \usepackage{mdwlist}
 \usepackage{fancyhdr}
+\usepackage{comment}
 
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -208,6 +209,17 @@ MPI Forum Hybrid Working Group\\
  
 \newpage
 \pagestyle{empty}
+
+\pdfbookmark[0]{Abstract}{Abstract}
+\include{abstract}
+
+% a \newpage is done by \include
+\pdfbookmark[0]{History}{History}
+\include{history}
+
+% a \newpage is done by \include
+\include{credits}
+
 % Turning off \withlinenumbers here causes the contents pages to be
 % printed without the rulers
 \contentstrue
@@ -232,8 +244,6 @@ MPI Forum Hybrid Working Group\\
 %\fancyhead[C]{\disclaim}
 \fancyfoot[C]{\thepage\\
 \disclaim}
-
-%\include{history}
 
 \startchap
 \include{mem_alloc}
