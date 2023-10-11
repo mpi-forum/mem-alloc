@@ -12,7 +12,8 @@ int main(int argc, char *argv[])
     int *device_buf = NULL;
     MPI_File file;
     MPI_Status status;
-    
+    // usage mode: REQUESTED
+    // supply mpi_memory_alloc_kinds to the MPI startup mechansim (not shown)
     MPI_Init(&argc, &argv);
     
     // usage mode: PROVIDED
