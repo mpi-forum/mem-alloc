@@ -207,9 +207,6 @@ MPI Forum Hybrid Working Group\\
 \setcounter{page}{2} 
 \hfuzz=5pt
  
-\newpage
-\pagestyle{empty}
-
 \pdfbookmark[0]{Abstract}{Abstract}
 \include{abstract}
 
@@ -230,7 +227,7 @@ MPI Forum Hybrid Working Group\\
 
 % If there have been an odd number of pages, we need to eject another
 % page before we change the page counter
-\ifodd\value{page}\else\hbox{}\thispagestyle{empty}\newpage\fi
+%\ifodd\value{page}\else\hbox{}\thispagestyle{empty}\newpage\fi
 
 \mainmatter  % included for use of documenttype 'book' 
 \withlinenumbers
