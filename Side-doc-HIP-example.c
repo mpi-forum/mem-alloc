@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     
     MPI_Init(&argc, &argv);
     
+    // usage mode: PROVIDED
     // Determine whether user has set the required
     // memory allocator kinds at startup. 
     MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
