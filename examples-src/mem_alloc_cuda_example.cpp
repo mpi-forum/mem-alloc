@@ -20,12 +20,14 @@ int main(int argc, char *argv[])
     MPI_Comm cuda_managed_comm = MPI_COMM_NULL;
     MPI_Comm cuda_device_comm = MPI_COMM_NULL;
 
+    // Usage mode: REQUESTED
     MPI_Info_create(&info);
     MPI_Info_set(info, "mpi_memory_alloc_kinds",
                        "system,cuda:device,cuda:managed");
     MPI_Session_init(info, MPI_ERRORS_ARE_FATAL, &session);
     MPI_Info_free(&info);
 
+    // Usage mode: PROVIDED
     MPI_Session_get_info(session, &info);
     MPI_Info_get_string(info, "mpi_memory_alloc_kinds",
                         &len, NULL, &flag);
@@ -55,6 +57,7 @@ int main(int argc, char *argv[])
     MPI_Group_from_session_pset(session, "mpi://WORLD" , &wgroup);
 
     // Create a communicator for operations on system memory
+    // Usage mode: ASSERTED
     MPI_Info_create(&info);
     MPI_Info_set(info, "mpi_assert_memory_alloc_kinds", "system");
     MPI_Comm_create_from_group(wgroup,
@@ -72,6 +75,7 @@ int main(int argc, char *argv[])
     if (cuda_managed_aware) {
         // Create a communicator for operations that use
         // CUDA managed buffers.
+        // Usage mode: ASSERTED
         MPI_Info_create(&info);
         MPI_Info_set(info, "mpi_assert_memory_alloc_kinds",
                      "cuda:managed");
@@ -87,6 +91,7 @@ int main(int argc, char *argv[])
         if (cuda_device_aware) {
             // Create a communicator for operations that use
             // CUDA device buffers.
+            // Usage mode: ASSERTED
             MPI_Info_create(&info);
             MPI_Info_set(info, "mpi_assert_memory_alloc_kinds",
                          "cuda:device");
