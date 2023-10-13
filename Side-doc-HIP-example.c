@@ -5,6 +5,8 @@
 #include <mpi.h>
 #include <hip/hip_runtime_api.h>
 
+#define BUFSIZE 1024
+
 int main(int argc, char *argv[])
 {
     int rocm_device_aware = 0;
@@ -39,21 +41,27 @@ int main(int argc, char *argv[])
     }
 
     hipMalloc((void**)&device_buf, BUFSIZE * sizeof(int));
-    
+
+    // The user could optionally create an info object,
+    // set mpi_assert_memory_alloc_kind to the memory type
+    // it plans to use, and pass this as an argument to
+    // MPI_File_open. This approach has the potential to
+    // enable further optimizations in the MPI library.
     MPI_File_open(MPI_COMM_WORLD, "inputfile",
 		  MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
     
     if (rocm_device_aware) {
         MPI_File_read(file, device_buf, BUFSIZE, MPI_INT, &status);
+	printf("Using if part\n");
     }
     else {
         int *tmp_buf;
-
-	tmp_buf = (int*) malloc (BUFISZE * sizeof(int));
+	printf("Using else part\n");
+	tmp_buf = (int*) malloc (BUFSIZE * sizeof(int));
 	MPI_File_read(file, tmp_buf, BUFSIZE, MPI_INT, &status);
 
 	hipMemcpyAsync(device_buf, tmp_buf, BUFSIZE * sizeof(int),
-		       hipMemcpyDefault);
+		       hipMemcpyDefault, 0);
 	hipStreamSynchronize(0);
 
 	free (tmp_buf);
