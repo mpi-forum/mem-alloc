@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     MPI_Info_create(&info);
     MPI_Info_set(info, "mpi_assert_memory_alloc_kinds", "system");
     MPI_Comm_create_from_group(wgroup,
-            "org.mpi-side-doc.mem-kind.example.system",
+            "org.mpi-forum.side-doc.mem-alloc-kind.cuda-example.system",
             info, MPI_ERRORS_ABORT, &system_comm);
     MPI_Info_free(&info);
 
