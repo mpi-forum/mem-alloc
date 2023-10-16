@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
         cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
                    cudaMemcpyHostToDevice, 0);
 
-        cudaStreamSynchronize(cudaStreamDefault); 
+        cudaStreamSynchronize(0); 
         if (cuda_device_aware) {
             // Perform communication using cuda_device_comm
             // if it's available.
@@ -147,13 +147,13 @@ int main(int argc, char *argv[])
             cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
                    cudaMemcpyDeviceToHost, 0);
             
-            cudaStreamSynchronize(cudaStreamDefault); 
+            cudaStreamSynchronize(0); 
             MPI_Allreduce(MPI_IN_PLACE, system_buf, 1, MPI_INT,
                           MPI_SUM, system_comm);
             cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
                    cudaMemcpyHostToDevice, 0);
 
-            cudaStreamSynchronize(cudaStreamDefault); 
+            cudaStreamSynchronize(0); 
             assert((*system_buf) == nranks);
         }
 
