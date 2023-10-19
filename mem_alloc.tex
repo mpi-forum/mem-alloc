@@ -108,16 +108,13 @@ showcases usage of some of the memory kinds defined in this section.
 \item \infokey{host}: Support for memory allocated on the host system that
     is page-locked for direct access from the ROCm device (\eg, memory
         allocations from the \function{hipHostMalloc()} function).
-        These memory allocations are attributed with \function{hipMemoryTypeHost}.
 
 \item \infokey{device}: Support for memory allocated on the ROCm device
     (\eg, memory allocations from the \function{hipMalloc()} function).
-        These memory allocations are attributed with \function{hipMemoryTypeDevice}.
 
 \item \infokey{managed}: Support for memory that is managed automatically
     by the ROCm runtime (\eg, memory allocations from the
         \function{hipMallocManaged()} function).
-        These memory allocations are attributed with \function{hipMemoryTypeManaged}.
 
 \end{itemize}
 
@@ -362,8 +359,9 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
 
     // Usage mode: PROVIDED
-    // Determine whether user has set the required
-    // memory allocator kinds at startup.
+    // Determine whether the MPI library supports the
+    // requested memory kinds by querying the MPI_INFO_ENV
+    // info object.
     MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
                         &len, NULL, &flag);
     if (flag) {
