@@ -359,9 +359,10 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
 
     // Usage mode: PROVIDED
-    // Determine whether the MPI library supports the
-    // requested memory kinds by querying the MPI_INFO_ENV
-    // info object.
+    // Query the MPI_INFO_ENV to determine
+    // whether the MPI library provides support for
+    // the memory allocation kinds by requested
+    // via the MPI startup mechanism
     MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
                         &len, NULL, &flag);
     if (flag) {
