@@ -175,12 +175,14 @@ int main(int argc, char *argv[])
     MPI_Comm cuda_managed_comm = MPI_COMM_NULL;
     MPI_Comm cuda_device_comm = MPI_COMM_NULL;
 
+    // Usage mode: REQUESTED
     MPI_Info_create(&info);
     MPI_Info_set(info, "mpi_memory_alloc_kinds",
                        "system,cuda:device,cuda:managed");
     MPI_Session_init(info, MPI_ERRORS_ARE_FATAL, &session);
     MPI_Info_free(&info);
 
+    // Usage mode: PROVIDED
     MPI_Session_get_info(session, &info);
     MPI_Info_get_string(info, "mpi_memory_alloc_kinds",
                         &len, NULL, &flag);
@@ -210,11 +212,12 @@ int main(int argc, char *argv[])
     MPI_Group_from_session_pset(session, "mpi://WORLD" , &wgroup);
 
     // Create a communicator for operations on system memory
+    // Usage mode: ASSERTED
     MPI_Info_create(&info);
     MPI_Info_set(info, "mpi_assert_memory_alloc_kinds", "system");
     MPI_Comm_create_from_group(wgroup,
-            "org.mpi-side-doc.mem-kind.example.system",
-            info, MPI_ERRORS_ABORT, &system_comm);
+        "org.mpi-forum.side-doc.mem-alloc-kind.cuda-example.system",
+        info, MPI_ERRORS_ABORT, &system_comm);
     MPI_Info_free(&info);
 
     MPI_Comm_size(system_comm, &nranks);
@@ -227,12 +230,13 @@ int main(int argc, char *argv[])
     if (cuda_managed_aware) {
         // Create a communicator for operations that use
         // CUDA managed buffers.
+        // Usage mode: ASSERTED
         MPI_Info_create(&info);
         MPI_Info_set(info, "mpi_assert_memory_alloc_kinds",
                      "cuda:managed");
         MPI_Comm_create_from_group(wgroup,
-            "org.mpi-side-doc.mem-kind.example.cuda.managed",
-            info, MPI_ERRORS_ABORT, &cuda_managed_comm);
+          "org.mpi-forum.side-doc.mem-alloc-kind.cuda-example.managed",
+          info, MPI_ERRORS_ABORT, &cuda_managed_comm);
         MPI_Info_free(&info);
     }
     else {
@@ -242,12 +246,13 @@ int main(int argc, char *argv[])
         if (cuda_device_aware) {
             // Create a communicator for operations that use
             // CUDA device buffers.
+            // Usage mode: ASSERTED
             MPI_Info_create(&info);
             MPI_Info_set(info, "mpi_assert_memory_alloc_kinds",
                          "cuda:device");
             MPI_Comm_create_from_group(wgroup,
-                "org.mpi-side-doc.mem-kind.example.cuda.device",
-                info, MPI_ERRORS_ABORT, &cuda_device_comm);
+            "org.mpi-forum.side-doc.mem-alloc-kind.cuda-example.device",
+            info, MPI_ERRORS_ABORT, &cuda_device_comm);
             MPI_Info_free(&info);
         }
         else {
@@ -260,7 +265,8 @@ int main(int argc, char *argv[])
     /** Execute according to level of CUDA awareness **/
     if (cuda_managed_aware) {
         // Allocate managed buffer and initialize it
-        cudaMallocManaged((void**)&managed_buf, sizeof(int));
+        cudaMallocManaged((void**)&managed_buf, sizeof(int),
+                          cudaMemAttachGlobal);
         *managed_buf = 1;
 
         // Perform communication using cuda_managed_comm
@@ -280,7 +286,7 @@ int main(int argc, char *argv[])
         // Allocate CUDA device buffer and initialize it
         cudaMalloc((void**)&device_buf, sizeof(int));
         cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
-                        cudaMemcpyHostToDevice);
+                        cudaMemcpyHostToDevice, 0);
 
         cudaStreamSynchronize(0);
         if (cuda_device_aware) {
@@ -295,15 +301,15 @@ int main(int argc, char *argv[])
             // Otherwise, copy data to a system buffer,
             // use system_comm, and copy data back to device buffer
             cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
-                            cudaMemcpyDeviceToHost);
+                            cudaMemcpyDeviceToHost, 0);
 
-            cudaStreamSynchronize(cudaStreamDefault);
+            cudaStreamSynchronize(0);
             MPI_Allreduce(MPI_IN_PLACE, system_buf, 1, MPI_INT,
                           MPI_SUM, system_comm);
             cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
-                            cudaMemcpyHostToDevice);
+                   cudaMemcpyHostToDevice, 0);
 
-            cudaStreamSynchronize(cudaStreamDefault);
+            cudaStreamSynchronize(0);
             assert((*system_buf) == nranks);
         }
 
