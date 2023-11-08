@@ -586,6 +586,13 @@ int main(int argc, char *argv[])
     MPI_Comm_size(system_comm, &nranks);
 
     /** Check for CUDA awareness **/
+    
+    // Note: MPI does not limit program execution with different
+    // levels of device awareness on different processes (e.g.
+    // some processes support CUDA managed allocations, and some
+    // do not). This example operates with homogeneous support
+    // across all processes for simplicity.
+
     // Check if all processes have CUDA managed support
     MPI_Allreduce(MPI_IN_PLACE, &cuda_managed_aware, 1, MPI_INT,
                   MPI_LAND, system_comm);
