@@ -68,12 +68,12 @@ also explains their usage model.
 \label{chap:definitions}
 
 This chapter contains definitions of memory allocation kinds and
-their restrictors.
+their restrictors for different memory types.
 
-\section{Kind: cuda}
+\section{CUDA memory kinds}
 
-The \infokey{cuda} memory kind refers to the memory allocated by the
-CUDA runtime system~\cite{cudaref}.
+We define \infokey{cuda} as a memory kind that refers to the memory
+allocated by the CUDA runtime system~\cite{cudaref}.
 \exsref{example:alloc-kind-spm-sycl}{example:alloc-kind-spm-cuda}
 showcase usage of some of the memory kinds defined in this section.
 
@@ -97,10 +97,10 @@ showcase usage of some of the memory kinds defined in this section.
 
 \end{itemize}
 
-\section{Kind: rocm}
+\section{ROCm memory kinds}
 
-The \infokey{rocm} memory kind refers to the memory allocated by the ROCm
-runtime system~\cite{rocmref}.
+We define \infokey{rocm} as a memory kind that refers to the memory
+allocated by the ROCm runtime system~\cite{rocmref}.
 \exsref{example:alloc-kind-spm-sycl}{example:alloc-kind-wpm-hip}
 showcase usage of some of the memory kinds defined in this section.
 
@@ -121,10 +121,10 @@ showcase usage of some of the memory kinds defined in this section.
 
 \end{itemize}
 
-\section{Kind: level\_zero}
+\section{Level Zero memory kinds}
 
-The \infokey{level\_zero} memory kind refers to the memory allocated by the
-Level Zero runtime system~\cite{zeref}.
+We define \infokey{level\_zero} as a memory kind that refers to the memory
+allocated by the Level Zero runtime system~\cite{zeref}.
 \exref{example:alloc-kind-spm-sycl} showcases usage of some of the memory
 kinds defined in this section.
 
