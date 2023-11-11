@@ -52,27 +52,28 @@ in their memory types. The differences in memory types influence
 feature availability and performance behavior of an application
 running on such modern systems. Hence, \mpi/ libraries need to be
 aware of and support additional memory types. For a given type of
-memory, \mpi/ libraries need to know the associated memory allocator and
-the limitations on memory access. The different memory kinds capture
+memory, \mpi/ libraries need to know the associated memory allocator,
+the memory's properties, and the methodologies to access the memory.
+The different memory kinds capture
 the differentiating information needed by \mpi/ libraries for different
 memory types.
 
 This \mpi/ side document defines the memory allocation kinds and their
 associated restrictors that users can use to query the support for
 different memory kinds provided by the \mpi/ library. These definitions
-supplement those found in section 11.4.3 of the \mpi/ standard, which
+supplement those found in section 11.4.3 of the \mpiivdoti/ standard, which
 also explains their usage model.
 
 \chapter{Definitions}
 \label{chap:definitions}
 
-This section contains definitions of memory allocation kinds and
-their restrictors.
+This chapter contains definitions of memory allocation kinds and
+their restrictors for different memory types.
 
-\section{Kind: cuda}
+\section{CUDA memory kind}
 
-The \infokey{cuda} memory kind refers to the memory allocated by the
-CUDA runtime system~\cite{cudaref}.
+We define \infokey{cuda} as a memory kind that refers to the memory
+allocated by the CUDA runtime system~\cite{cudaref}.
 \exsref{example:alloc-kind-spm-sycl}{example:alloc-kind-spm-cuda}
 showcase usage of some of the memory kinds defined in this section.
 
@@ -96,10 +97,10 @@ showcase usage of some of the memory kinds defined in this section.
 
 \end{itemize}
 
-\section{Kind: rocm}
+\section{ROCm memory kind}
 
-The \infokey{rocm} memory kind refers to the memory allocated by the ROCm
-runtime system~\cite{rocmref}.
+We define \infokey{rocm} as a memory kind that refers to the memory
+allocated by the ROCm runtime system~\cite{rocmref}.
 \exsref{example:alloc-kind-spm-sycl}{example:alloc-kind-wpm-hip}
 showcase usage of some of the memory kinds defined in this section.
 
@@ -120,10 +121,10 @@ showcase usage of some of the memory kinds defined in this section.
 
 \end{itemize}
 
-\section{Kind: level\_zero}
+\section{Level Zero memory kind}
 
-The \infokey{level\_zero} memory kind refers to the memory allocated by the
-Level Zero runtime system~\cite{zeref}.
+We define \infokey{level\_zero} as a memory kind that refers to the memory
+allocated by the Level Zero runtime system~\cite{zeref}.
 \exref{example:alloc-kind-spm-sycl} showcases usage of some of the memory
 kinds defined in this section.
 
