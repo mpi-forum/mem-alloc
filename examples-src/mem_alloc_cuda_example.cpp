@@ -68,6 +68,13 @@ int main(int argc, char *argv[])
     MPI_Comm_size(system_comm, &nranks);
 
     /*** Check for CUDA awareness ***/
+
+    // Note: MPI does not require homogeneous support
+    // across all processes for memory allocation kinds.
+    // This example chooses to use
+    // CUDA managed allocations (or device allocations)
+    // only when all processes report it is supported.
+
     // Check if all processes have CUDA managed support
     MPI_Allreduce(MPI_IN_PLACE, &cuda_managed_aware, 1, MPI_INT,
                   MPI_LAND, system_comm);
