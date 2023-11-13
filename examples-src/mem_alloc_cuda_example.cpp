@@ -142,7 +142,8 @@ int main(int argc, char *argv[])
     }
     else {
         // Allocate system buffer and initialize it
-        system_buf = (int*)malloc(sizeof(int));
+        // (using cudaMallocHost instead of malloc for performance)
+        CUDA_CHECK(cudaMallocHost((void**)&system_buf, sizeof(int)));
         *system_buf = 1;
 
         // Allocate CUDA device buffer and initialize it
@@ -176,7 +177,7 @@ int main(int argc, char *argv[])
         }
 
         CUDA_CHECK(cudaFree(device_buf));
-        free(system_buf);
+        CUDA_CHECK(cudaFreeHost(system_buf));
     }
 
     if (cuda_managed_comm != MPI_COMM_NULL)
