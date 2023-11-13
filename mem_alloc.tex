@@ -728,6 +728,7 @@ int main(int argc, char *argv[])
     int *device_buf = NULL;
     MPI_File file;
     MPI_Status status;
+    MPI_Info info;
 
     // Usage mode: REQUESTED
     // Supply mpi_memory_alloc_kinds to the MPI startup
@@ -735,11 +736,12 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
 
     // Usage mode: PROVIDED
-    // Query the MPI_INFO_ENV to determine
-    // whether the MPI library provides support for
-    // the memory allocation kinds by requested
-    // via the MPI startup mechanism
-    MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
+    // Query the MPI_INFO object on MPI_COMM_WORLD to
+    // determine whether the MPI library provides 
+    // support for the memory allocation kinds 
+    // requested via the MPI startup mechanism
+    MPI_Comm_get_info(MPI_COMM_WORLD, &info);
+    MPI_Info_get_string(info, "mpi_memory_alloc_kinds",
                         &len, NULL, &flag);
     if (flag) {
         char *val, *valptr, *kind;
@@ -747,7 +749,7 @@ int main(int argc, char *argv[])
         val = valptr = (char *) malloc(len);
         if (NULL == val) return 1;
 
-        MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
+        MPI_Info_get_string(info, "mpi_memory_alloc_kinds",
                             &len, val, &flag);
 
         while ((kind = strsep(&val, ",")) != NULL) {
