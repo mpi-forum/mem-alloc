@@ -5,6 +5,14 @@
 #include <mpi.h>
 #include <hip/hip_runtime_api.h>
 
+#define HIP_CHECK(condition) {                                            \
+        hipError_t error = condition;                                     \
+        if(error != hipSuccess){                                          \
+            fprintf(stderr,"HIP error: %d line: %d\n", error,  __LINE__); \
+            MPI_Abort(MPI_COMM_WORLD, error);                             \
+        }                                                                 \
+    }
+
 #define BUFSIZE 1024
 
 int main(int argc, char *argv[])
@@ -14,22 +22,27 @@ int main(int argc, char *argv[])
     int *device_buf = NULL;
     MPI_File file;
     MPI_Status status;
+    MPI_Info info;
+
     // usage mode: REQUESTED
     // supply mpi_memory_alloc_kinds to the MPI startup mechansim (not shown)
     MPI_Init(&argc, &argv);
     
-    // usage mode: PROVIDED
-    // Determine whether user has set the required
-    // memory allocator kinds at startup. 
-    MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
-			&len, NULL, &flag);
+    // Usage mode: PROVIDED
+    // Query the MPI_INFO object on MPI_COMM_WORLD to
+    // determine whether the MPI library provides
+    // support for the memory allocation kinds
+    // requested via the MPI startup mechanism
+    MPI_Comm_get_info(MPI_COMM_WORLD, &info);
+    MPI_Info_get_string(info, "mpi_memory_alloc_kinds",
+                        &len, NULL, &flag);
     if (flag) {
         char *val, *valptr, *kind;
 
         val = valptr = (char *) malloc(len);
         if (NULL == val) return 1;
 
-        MPI_Info_get_string(MPI_INFO_ENV, "mpi_memory_alloc_kinds",
+        MPI_Info_get_string(info, "mpi_memory_alloc_kinds",
                             &len, val, &flag);
 
         while ((kind = strsep(&val, ",")) != NULL) {
@@ -40,7 +53,7 @@ int main(int argc, char *argv[])
         free(valptr);
     }
 
-    hipMalloc((void**)&device_buf, BUFSIZE * sizeof(int));
+    HIP_CHECK(hipMalloc((void**)&device_buf, BUFSIZE * sizeof(int)));
 
     // The user could optionally create an info object,
     // set mpi_assert_memory_alloc_kind to the memory type
@@ -60,9 +73,9 @@ int main(int argc, char *argv[])
 	tmp_buf = (int*) malloc (BUFSIZE * sizeof(int));
 	MPI_File_read(file, tmp_buf, BUFSIZE, MPI_INT, &status);
 
-	hipMemcpyAsync(device_buf, tmp_buf, BUFSIZE * sizeof(int),
-		       hipMemcpyDefault, 0);
-	hipStreamSynchronize(0);
+	HIP_CHECK(hipMemcpyAsync(device_buf, tmp_buf, BUFSIZE * sizeof(int),
+		                 hipMemcpyDefault, 0));
+	HIP_CHECK(hipStreamSynchronize(0));
 
 	free (tmp_buf);
     }
@@ -70,7 +83,7 @@ int main(int argc, char *argv[])
     // launch compute kernel(s) 
     
     MPI_File_close(&file);
-    hipFree(device_buf);
+    HIP_CHECK(hipFree(device_buf));
 
     MPI_Finalize();
     return 0;
