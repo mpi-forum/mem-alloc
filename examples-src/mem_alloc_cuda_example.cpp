@@ -10,7 +10,7 @@
         const cudaError_t error = call;                             \
         if (error != cudaSuccess)                                   \
         {                                                           \
-            fprintf(stderr, "An error occurred: \"%s\" at %s:%s\n", \
+            fprintf(stderr, "An error occurred: \"%s\" at %s:%d\n", \
                     cudaGetErrorString(error), __FILE__, __LINE__); \
             exit(-1);                                               \
         }                                                           \
