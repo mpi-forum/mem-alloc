@@ -664,7 +664,7 @@ int main(int argc, char *argv[])
     }
     else {
         // Allocate system buffer and initialize it
-        // (using cudaMallocHost instead of malloc for performance)
+        // (using cudaMallocHost for better performance of cudaMemcpy)
         CUDA_CHECK(cudaMallocHost((void**)&system_buf, sizeof(int)));
         *system_buf = 1;
 
