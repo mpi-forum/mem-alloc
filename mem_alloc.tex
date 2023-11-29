@@ -719,6 +719,14 @@ allocation kinds with MPI File I/O.
 #include <mpi.h>
 #include <hip/hip_runtime_api.h>
 
+#define HIP_CHECK(condition) {                                            \
+        hipError_t error = condition;                                     \
+        if(error != hipSuccess){                                          \
+            fprintf(stderr,"HIP error: %d line: %d\n", error,  __LINE__); \
+            MPI_Abort(MPI_COMM_WORLD, error);                             \
+        }                                                                 \
+    }
+
 #define BUFSIZE 1024
 
 int main(int argc, char *argv[])
@@ -760,7 +768,7 @@ int main(int argc, char *argv[])
         free(valptr);
     }
 
-    hipMalloc((void**)&device_buf, BUFSIZE * sizeof(int));
+    HIP_CHECK(hipMalloc((void**)&device_buf, BUFSIZE * sizeof(int)));
 
     // The user could optionally create an info object,
     // set mpi_assert_memory_alloc_kind to the memory type
@@ -780,9 +788,9 @@ int main(int argc, char *argv[])
         tmp_buf = (int*) malloc (BUFSIZE * sizeof(int));
         MPI_File_read(file, tmp_buf, BUFSIZE, MPI_INT, &status);
 
-        hipMemcpyAsync(device_buf, tmp_buf, BUFSIZE * sizeof(int),
-                       hipMemcpyDefault, 0);
-        hipStreamSynchronize(0);
+        HIP_CHECK(hipMemcpyAsync(device_buf, tmp_buf, BUFSIZE * sizeof(int),
+                                 hipMemcpyDefault, 0));
+        HIP_CHECK(hipStreamSynchronize(0));
 
         free(tmp_buf);
     }
@@ -790,7 +798,7 @@ int main(int argc, char *argv[])
     // Launch compute kernel(s)
 
     MPI_File_close(&file);
-    hipFree(device_buf);
+    HIP_CHECK(hipFree(device_buf));
 
     MPI_Finalize();
     return 0;
