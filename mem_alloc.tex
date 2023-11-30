@@ -524,6 +524,19 @@ by the underlying \mpi/ library.
 #include <mpi.h>
 #include <cuda_runtime.h>
 
+#define CUDA_CHECK(mpi_comm, call)                          \
+    {                                                       \
+        const cudaError_t error = call;                     \
+        if (error != cudaSuccess)                           \
+        {                                                   \
+            fprintf(stderr,                                 \
+                    "An error occurred: \"%s\" at %s:%d\n", \
+                    cudaGetErrorString(error),              \
+                    __FILE__, __LINE__);                    \
+            MPI_Abort(mpi_comm, error);                     \
+        }                                                   \
+    }
+
 int main(int argc, char *argv[])
 {
     int cuda_device_aware = 0;
@@ -636,8 +649,9 @@ int main(int argc, char *argv[])
     /** Execute according to level of CUDA awareness **/
     if (cuda_managed_aware) {
         // Allocate managed buffer and initialize it
-        cudaMallocManaged((void**)&managed_buf, sizeof(int),
-                          cudaMemAttachGlobal);
+        CUDA_CHECK(system_comm,
+                   cudaMallocManaged((void**)&managed_buf, sizeof(int),
+                   cudaMemAttachGlobal));
         *managed_buf = 1;
 
         // Perform communication using cuda_managed_comm
@@ -647,19 +661,25 @@ int main(int argc, char *argv[])
 
         assert((*managed_buf) == nranks);
 
-        cudaFree(managed_buf);
+        CUDA_CHECK(system_comm,
+                   cudaFree(managed_buf));
     }
     else {
         // Allocate system buffer and initialize it
-        system_buf = (int*)malloc(sizeof(int));
+        // (using cudaMallocHost for better performance of cudaMemcpy)
+        CUDA_CHECK(system_comm,
+                   cudaMallocHost((void**)&system_buf, sizeof(int)));
         *system_buf = 1;
 
         // Allocate CUDA device buffer and initialize it
-        cudaMalloc((void**)&device_buf, sizeof(int));
-        cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
-                        cudaMemcpyHostToDevice, 0);
+        CUDA_CHECK(system_comm,
+                   cudaMalloc((void**)&device_buf, sizeof(int)));
+        CUDA_CHECK(system_comm,
+                   cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
+                   cudaMemcpyHostToDevice, 0));
 
-        cudaStreamSynchronize(0);
+        CUDA_CHECK(system_comm,
+                   cudaStreamSynchronize(0));
         if (cuda_device_aware) {
             // Perform communication using cuda_device_comm
             // if it's available.
@@ -671,21 +691,25 @@ int main(int argc, char *argv[])
         else {
             // Otherwise, copy data to a system buffer,
             // use system_comm, and copy data back to device buffer
-            cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
-                            cudaMemcpyDeviceToHost, 0);
+            CUDA_CHECK(system_comm,
+                       cudaMemcpyAsync(system_buf, device_buf,
+                       sizeof(int), cudaMemcpyDeviceToHost, 0));
 
-            cudaStreamSynchronize(0);
+            CUDA_CHECK(system_comm,
+                       cudaStreamSynchronize(0));
             MPI_Allreduce(MPI_IN_PLACE, system_buf, 1, MPI_INT,
                           MPI_SUM, system_comm);
-            cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
-                   cudaMemcpyHostToDevice, 0);
+            CUDA_CHECK(system_comm,
+                       cudaMemcpyAsync(device_buf, system_buf,
+                       sizeof(int), cudaMemcpyHostToDevice, 0));
 
-            cudaStreamSynchronize(0);
+            CUDA_CHECK(system_comm,
+                       cudaStreamSynchronize(0));
             assert((*system_buf) == nranks);
         }
 
-        cudaFree(device_buf);
-        free(system_buf);
+        CUDA_CHECK(system_comm, cudaFree(device_buf));
+        CUDA_CHECK(system_comm, cudaFreeHost(system_buf));
     }
 
     if (cuda_managed_comm != MPI_COMM_NULL)
