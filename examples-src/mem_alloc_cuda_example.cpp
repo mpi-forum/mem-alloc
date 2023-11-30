@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     /*** Execute according to level of CUDA awareness ***/
     if (cuda_managed_aware) {
         // Allocate managed buffer and initialize it
-        CUDA_CHECK(cuda_managed_comm,
+        CUDA_CHECK(system_comm,
                    cudaMallocManaged((void**)&managed_buf, sizeof(int), cudaMemAttachGlobal));
         *managed_buf = 1;
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 
         assert((*managed_buf) == nranks);
         
-        CUDA_CHECK(cuda_managed_comm,
+        CUDA_CHECK(system_comm,
                    cudaFree(managed_buf));
     }
     else {
