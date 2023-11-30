@@ -5,14 +5,14 @@
 #include <mpi.h>
 #include <cuda_runtime.h>
 
-#define CUDA_CHECK(call)                                            \
+#define CUDA_CHECK(mpi_comm, call)                                  \
     {                                                               \
         const cudaError_t error = call;                             \
         if (error != cudaSuccess)                                   \
         {                                                           \
             fprintf(stderr, "An error occurred: \"%s\" at %s:%d\n", \
                     cudaGetErrorString(error), __FILE__, __LINE__); \
-            exit(-1);                                               \
+            MPI_Abort(mpi_comm, error);                             \
         }                                                           \
     }
 
@@ -128,7 +128,8 @@ int main(int argc, char *argv[])
     /*** Execute according to level of CUDA awareness ***/
     if (cuda_managed_aware) {
         // Allocate managed buffer and initialize it
-        CUDA_CHECK(cudaMallocManaged((void**)&managed_buf, sizeof(int), cudaMemAttachGlobal));
+        CUDA_CHECK(cuda_managed_comm,
+                   cudaMallocManaged((void**)&managed_buf, sizeof(int), cudaMemAttachGlobal));
         *managed_buf = 1;
 
         // Perform communication using cuda_managed_comm
@@ -138,20 +139,25 @@ int main(int argc, char *argv[])
 
         assert((*managed_buf) == nranks);
         
-        CUDA_CHECK(cudaFree(managed_buf));
+        CUDA_CHECK(cuda_managed_comm,
+                   cudaFree(managed_buf));
     }
     else {
         // Allocate system buffer and initialize it
         // (using cudaMallocHost for better performance of cudaMemcpy)
-        CUDA_CHECK(cudaMallocHost((void**)&system_buf, sizeof(int)));
+        CUDA_CHECK(system_comm,
+                   cudaMallocHost((void**)&system_buf, sizeof(int)));
         *system_buf = 1;
 
         // Allocate CUDA device buffer and initialize it
-        CUDA_CHECK(cudaMalloc((void**)&device_buf, sizeof(int)));
-        CUDA_CHECK(cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
+        CUDA_CHECK(system_comm,
+                   cudaMalloc((void**)&device_buf, sizeof(int)));
+        CUDA_CHECK(system_comm,
+                   cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
                    cudaMemcpyHostToDevice, 0));
 
-        CUDA_CHECK(cudaStreamSynchronize(0));
+        CUDA_CHECK(system_comm,
+                   cudaStreamSynchronize(0));
         if (cuda_device_aware) {
             // Perform communication using cuda_device_comm
             // if it's available.
@@ -163,21 +169,25 @@ int main(int argc, char *argv[])
         else {
             // Otherwise, copy data to a system buffer,
             // use system_comm, and copy data back to device buffer
-            CUDA_CHECK(cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
-                   cudaMemcpyDeviceToHost, 0));
+            CUDA_CHECK(system_comm,
+                       cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
+                       cudaMemcpyDeviceToHost, 0));
             
-            CUDA_CHECK(cudaStreamSynchronize(0));
+            CUDA_CHECK(system_comm,
+                       cudaStreamSynchronize(0));
             MPI_Allreduce(MPI_IN_PLACE, system_buf, 1, MPI_INT,
                           MPI_SUM, system_comm);
-            CUDA_CHECK(cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
-                   cudaMemcpyHostToDevice, 0));
+            CUDA_CHECK(system_comm,
+                       cudaMemcpyAsync(device_buf, system_buf, sizeof(int),
+                       cudaMemcpyHostToDevice, 0));
 
-            CUDA_CHECK(cudaStreamSynchronize(0));
+            CUDA_CHECK(system_comm,
+                       cudaStreamSynchronize(0));
             assert((*system_buf) == nranks);
         }
 
-        CUDA_CHECK(cudaFree(device_buf));
-        CUDA_CHECK(cudaFreeHost(system_buf));
+        CUDA_CHECK(system_comm, cudaFree(device_buf));
+        CUDA_CHECK(system_comm, cudaFreeHost(system_buf));
     }
 
     if (cuda_managed_comm != MPI_COMM_NULL)
