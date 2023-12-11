@@ -139,6 +139,24 @@ allocated by the Level Zero runtime system~\cite{zeref}.
 
 \end{itemize}
 
+\section{OpenCL memory kind}
+
+We define \infokey{opencl} as a memory kind that refers to the memory
+allocated by the OpenCL runtime system~\cite{oclref}.
+\exref{example:alloc-kind-spm-sycl} showcases its usage.
+
+\subsubsection{Restrictors}
+
+\begin{itemize}
+
+\item \infokey{host}: Support for memory that is owned by the host and is accessible by the host and by any OpenCL devices.
+
+\item \infokey{device}: Support for memory that is owned by a specific OpenCL device.
+
+\item \infokey{shared}: Support for memory that has shared ownership between the host and one or more OpenCL devices.
+
+\end{itemize}
+
 \chapter{Examples}
 \label{chap:examples}
 
@@ -215,6 +233,10 @@ int main(int argc, char* argv[]) {
             switch (qBackendEnum) {
             case sycl::backend::ext_oneapi_level_zero:
                 return retType{ true, "level_zero",
+                                {"device", "shared", "host"} };
+                break;
+            case sycl::backend::ext_oneapi_opencl:
+                return retType{ true, "opencl",
                                 {"device", "shared", "host"} };
                 break;
             case sycl::backend::ext_oneapi_cuda:
@@ -368,7 +390,7 @@ int main(int argc, char* argv[]) {
                 MPI_Info_free(&info);
             }
             if (!provided)
-                MPI_Session_Finalize(&session);
+                MPI_Session_finalize(&session);
             else {
                 // usage mode: ASSERTED
                 std::string assert_key_for_mpi(
@@ -477,7 +499,7 @@ int main(int argc, char* argv[]) {
                   << std::endl;
 
         MPI_Comm_disconnect(&comm);
-        MPI_Session_Finalize(&session);
+        MPI_Session_finalize(&session);
 
         int answer = std::numeric_limits<int>::max();
         if (method == InteractionMethod
