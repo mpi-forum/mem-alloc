@@ -65,11 +65,9 @@ int main(int argc, char *argv[])
     
     if (rocm_device_aware) {
         MPI_File_read(file, device_buf, BUFSIZE, MPI_INT, &status);
-	printf("Using if part\n");
     }
     else {
         int *tmp_buf;
-	printf("Using else part\n");
 	tmp_buf = (int*) malloc (BUFSIZE * sizeof(int));
 	MPI_File_read(file, tmp_buf, BUFSIZE, MPI_INT, &status);
 
