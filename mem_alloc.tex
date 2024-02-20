@@ -70,6 +70,12 @@ also explains their usage model.
 This chapter contains definitions of memory allocation kinds and
 their restrictors for different memory types.
 
+Although the currently defined memory allocation kinds map to low-level
+GPU programming models, they can also be used in programs that use
+higher-level abstractions like SYCL (as shown in
+\exref{example:alloc-kind-spm-sycl}) or the OpenMP API if their
+underlying implementations use the corresponding memory allocator.
+
 \section{CUDA memory kind}
 
 We define \infokey{cuda} as a memory kind that refers to the memory
