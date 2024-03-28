@@ -770,7 +770,9 @@ int main(int argc, char *argv[])
 
     // Usage mode: REQUESTED
     // Supply mpi_memory_alloc_kinds to the MPI startup
-    // mechanism (not shown)
+    // mechanism, e.g.
+    //    mpiexec -memory-alloc-kinds system,mpi,rocm:device ...
+    // See section 11.5 in MPI 4.1 for more details
     MPI_Init(&argc, &argv);
 
     // Usage mode: PROVIDED
