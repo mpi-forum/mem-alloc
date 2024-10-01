@@ -164,7 +164,12 @@ int main(int argc, char *argv[])
             MPI_Allreduce(MPI_IN_PLACE, device_buf, 1, MPI_INT,
                           MPI_SUM, cuda_device_comm);
             
-            assert((*device_buf) == nranks);
+            CUDA_CHECK(system_comm,
+                       cudaMemcpyAsync(system_buf, device_buf, sizeof(int),
+                       cudaMemcpyDeviceToHost, 0));
+            CUDA_CHECK(system_comm,
+                       cudaStreamSynchronize(0));
+            assert((*system_buf) == nranks);
         }
         else {
             // Otherwise, copy data to a system buffer,
